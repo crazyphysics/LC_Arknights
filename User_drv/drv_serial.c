@@ -21,7 +21,9 @@ void Serial_RxDMA_Init(UART_HandleTypeDef *huart)
  */
 HAL_StatusTypeDef Serial_SendString(UART_HandleTypeDef *huart, char *str)
 {
-	uint16_t size = strlen(str);
+	uint16_t size = 0;
+	char *p = str;
+	while(*p++ != '\0') size++;	// 计算字符串长度
 	
     return HAL_UART_Transmit_DMA(huart, (uint8_t *)str, size);
 }
@@ -67,6 +69,24 @@ HAL_StatusTypeDef Serial_Printf_DMA(UART_HandleTypeDef *huart, char *format, ...
 	va_end(arg);					//结束变量arg
 	return HAL_UART_Transmit_DMA(huart, (uint8_t *)String, strlen(String));		//串口发送字符数组（字符串）
 }
+
+/**
+ * @brief UART2 printf函数
+ * @param format 同printf
+ * @param ... 同printf
+ * @warning 不得超过100字符
+ */
+HAL_StatusTypeDef UART2_printf(UART_HandleTypeDef *huart, char *format, ...)
+{
+	char String[100];				//定义字符数组
+	va_list arg;					//定义可变参数列表数据类型的变量arg
+	va_start(arg, format);			//从format开始，接收参数列表到arg变量
+	vsprintf(String, format, arg);	//使用vsprintf打印格式化字符串和参数列表到字符数组中
+	va_end(arg);					//结束变量arg
+	return Serial_Printf_DMA(&huart2, (uint8_t *)String, strlen(String));		//串口发送字符数组（字符串）
+}
+
+
 /**
  * @brief 串口接收中断回调函数
  * @param huart 串口句柄
@@ -80,7 +100,7 @@ void Serial_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
 
 		// 重新开启DMA接收
         HAL_UARTEx_ReceiveToIdle_DMA(&huart2, serial_rx_packet, SERIAL_PACKET_SIZE);
-        __HAL_DMA_DISABLE_IT(huart2.hdmarx, DMA_IT_HT);
+        __HAL_DMA_DISABLE_IT(huart2.hdmarx, DMA_IT_HT);		// 关闭传输一半中断
 	}
 }
 
