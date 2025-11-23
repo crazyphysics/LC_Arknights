@@ -11,17 +11,24 @@ uint8_t pid_motor_flag = 0;
 // CAN接收回调函数
 void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 {
-    // Motor_HandleTypeDef hmotor_tmp;
-    // Motor_GetParam(&hmotor_tmp);
-    // hmotor[hmotor_tmp.id] = hmotor_tmp;
-    Motor_GetParam(&hmotor1);
+    if(hcan->Instance == CAN1)
+    {
+        // 将CAN报文存入电机句柄
+        Motor_GetParam(&hmotor1);
 
-    can_rx_flag = 1;
+        // 串口回显
+        UART2_printf("pidato:%.2f,%.2f,%.2f,%.2f,%.2f,%.2f\n", 
+            hmotor1.pid->kp, hmotor1.pid->ki, hmotor1.pid->kd, 
+            hmotor1.pid->actual, hmotor1.pid->target, hmotor1.pid->output);
+            
+        can_rx_flag = 1;
+    }
 }
 
 // UART接收完成回调函数
 void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
 {
+    // 解析串口PID信息, 并赋值给hmotor1
     Serial_RxEventCallback(huart, Size);
 }
 

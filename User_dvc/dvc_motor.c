@@ -170,7 +170,7 @@ static inline uint16_t can_to_uint16(uint8_t high, uint8_t low)
 }
 
 /**
- * @brief 获取电机参数
+ * @brief 获取电机参数, 自动从can_rx_packet中解析
  * @param hmotor 电机句柄
  * @note 数据拼接说明: 
  * @note CAN接收的报文是uint8_t类型, 在这里需要手动拼接到uint16_t类型, 不得使用int类型, 符号位会干扰, 

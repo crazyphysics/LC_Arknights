@@ -20,6 +20,6 @@ HAL_StatusTypeDef Serial_SendString(UART_HandleTypeDef *huart, char *str);
 HAL_StatusTypeDef Serial_Printf(UART_HandleTypeDef *huart, char *format, ...);
 HAL_StatusTypeDef Serial_Printf_DMA(UART_HandleTypeDef *huart, char *format, ...);
 void Serial_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size);
-HAL_StatusTypeDef UART2_printf(UART_HandleTypeDef *huart, char *format, ...);
+HAL_StatusTypeDef UART2_printf(char *format, ...);
 
 #endif
