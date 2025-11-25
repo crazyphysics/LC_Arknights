@@ -1,5 +1,6 @@
 #include "alg_pid.h"
 #include "stdlib.h"
+#include "math.h"
 
 #define abs(x)  ((x)>=0 ? (x) : -(x))     // 取绝对值
 
@@ -20,7 +21,7 @@ void PID_SetParam(PID_HandleTypeDef *pid, float kp, float ki, float kd)
 void PID_Update(PID_HandleTypeDef *pid)
 {
     // 微分先行 - 更新实际值
-    if(pid->mode == PID_MODE_POS_DIFF_FIRST)
+    if(pid->mode & PID_MODE_DIFF_FIRST)
         pid->act1 = pid->act0;
     
     // 误差更新
@@ -33,19 +34,28 @@ void PID_Update(PID_HandleTypeDef *pid)
     if(abs(pid->err0) < pid->deadzone) pid->err0 = 0;
 
     // 积分计算
-    pid->err_int += pid->err0;
+    // 变速积分
+    if(pid->mode & PID_MODE_INTEG_CHANGE)
+    {
+        pid->err_int += pid->err0 * (exp(-abs(pid->err0)));
+    }
+    // 正常积分
+    else
+    {
+        pid->err_int += pid->err0;
+    }
 
     // 积分限幅
     if(pid->err_int > pid->err_int_max) pid->err_int = pid->err_int_max;
     if(pid->err_int < -pid->err_int_max) pid->err_int = -pid->err_int_max;
 
     // 计算输出
-    if(pid->mode == PID_MODE_POS_NORMAL)
+    if(pid->mode & PID_MODE_DIFF_NORMAL)
         pid->output = pid->kp * pid->err0 +
                       pid->ki * pid->err_int +
                       pid->kd * (pid->err1 - pid->err0) +
                       pid->compensation;
-    else if(pid->mode == PID_MODE_POS_DIFF_FIRST)
+    else if(pid->mode & PID_MODE_DIFF_FIRST)
         pid->output = pid->kp * pid->err0 +
                       pid->ki * pid->err_int +
                       pid->kd * (pid->act1 - pid->act0) +
@@ -63,7 +73,7 @@ void PID_Update(PID_HandleTypeDef *pid)
 void PID_UpdateInc(PID_HandleTypeDef *pid)
 {
     // 微分先行 - 更新实际值
-    if(pid->mode == PID_MODE_POS_DIFF_FIRST)
+    if(pid->mode & PID_MODE_DIFF_FIRST)
     {
         pid->act2 = pid->act1;
         pid->act1 = pid->act0;
@@ -87,11 +97,11 @@ void PID_UpdateInc(PID_HandleTypeDef *pid)
     if(pid->err_int < -pid->err_int_max) pid->err_int = -pid->err_int_max;
 
     // 计算输出
-    if(pid->mode == PID_MODE_POS_NORMAL)
+    if(pid->mode & PID_MODE_DIFF_NORMAL)
         pid->output = pid->kp * (pid->err0 - pid->err1) +
                     pid->ki * pid->err0 +
                     pid->kd * (pid->err0 - 2*pid->err1 + pid->err2);
-    else if(pid->mode == PID_MODE_POS_DIFF_FIRST)
+    else if(pid->mode & PID_MODE_DIFF_FIRST)
         pid->output = pid->kp * (pid->err0 - pid->err1) +
                     pid->ki * pid->err0 +
                     pid->kd * (pid->act0 - 2*pid->act1 + pid->act2);

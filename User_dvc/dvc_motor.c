@@ -23,6 +23,7 @@ static uint8_t motor_tx_0x200[8] = {0};
 static uint8_t motor_tx_0x1FF[8] = {0};
 
 static PID_HandleTypeDef pid1 = {
+    .mode = PID_MODE_POS,   // 位置式, 正常微分, 正常积分
     .output_max = 5000,     // 16384对应20A, 谁敢让它满转?
     .output_min = -5000,
     .err_int_max = 400,
@@ -55,7 +56,7 @@ void Motor_Init(void)
     for(uint8_t i=1; i<=8; i++)
     {
         hmotor[i].pid = &hpid[i];
-        hpid[i].mode = PID_MODE_POS_NORMAL;
+        hpid[i].mode = PID_MODE_POS;   // 位置式, 正常微分, 正常积分
         hmotor[i].id = i;
         hmotor[i].hcan = &hcan1;
         hmotor[i].gear_ratio = 19;

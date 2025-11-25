@@ -3,12 +3,15 @@
 
 #include "main.h"
 
+// 使用掩码格式进行模式设置
 typedef enum PID_ModeTypeDef
 {
-    PID_MODE_POS_NORMAL,        // 位置式
-    PID_MODE_POS_DIFF_FIRST,    // 位置式微分先行
-    PID_MODE_INC_NORMAL,        // 增量式
-    PID_MODE_INC_DIFF_FIRST,    // 增量式微分先行
+    PID_MODE_POS = 0x00,        // 位置式
+    PID_MODE_INC = 0x01,        // 增量式
+    PID_MODE_DIFF_FIRST = 0x02,    // 微分先行
+    PID_MODE_DIFF_NORMAL = 0x00,    // 不微分先行
+    PID_MODE_INTEG_CHANGE = 0x04,    // 变速积分
+    PID_MODE_INTEG_NORMAL = 0x00,    // 正常积分
 
 } PID_ModeTypeDef;
 
