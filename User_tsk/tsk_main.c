@@ -32,12 +32,14 @@ void loop(void)
     if(can_rx_flag == 1)
     {
         can_rx_flag = 0;
+        // 暂无任务
         
     }
 
     // 处理串口接收到的数据
     if(serial_rx_flag == 1)
     {
+        
         serial_rx_flag = 0;
 
         // 解析串口指令并赋值
